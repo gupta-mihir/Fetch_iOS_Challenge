@@ -9,46 +9,57 @@ import SwiftUI
 
 
 struct Meal : Hashable, Codable {
-    let name : String
-    let thumbnail : String
-    let id : String
+    var strMeal : String
+    var strMealThumb : String
+    var idMeal : String
     
 }
 
-class ViewModel<ObjectType: ObservableObject>{
-    @Published var meals : [Meal] = []
-    func fetch() completion{
-        guard let url = URL(string: "https://themealdb.com/api/json/v1/1/filter.php?c=Dessert") else{
-            return
-        }
-        let task = URLSession.shared.dataTask(with: url){ [weak self ] data, _, error in
-            guard let data = data, error == nil else{
-                return
-            }
-            
-            //convert to JSON
-            do{
-                let meals = try JSONDecoder().decode([Meal.self], from: data)
-                DispatchQueue.main.async{
-                    self?.meals = meals
-                }
-            }
-           catch{
-                print(error)
-            }
-        }
-        task.resume()
-    }
-}
 
 struct ContentView: View {
+    @State private var meals = [Meal]()
     var body: some View {
-        NavigationView{
-            List{
+        NavigationView {
+            List(meals, id : \.idMeal){ meal in
+                VStack(alignment: .leading) {
+                    Text(meal.strMeal)
+                        .font(.headline)
+                        .foregroundStyle(Color.black)
+                    //Image(meal.strMealThumb)
+                    
+                    
+                }
                 
             }
+            .navigationTitle("Meals")
+            .task {
+                await fetchData()
+            }
         }
-        .navigationTitle("Meals")
+    }
+    
+    func fetchData() async{
+        //create url
+        guard let url = URL(string: "https://themealdb.com/api/json/v1/1/filter.php?c=Dessert") else{
+            print("URL doesn't work")
+            return
+        }
+        //fetch data from that url
+        do{
+            let (data, _) = try await URLSession.shared.data(from: url)
+            
+            //decode that data
+            if let decodedResponse = try? JSONDecoder().decode([Meal].self, from: data){
+                meals = decodedResponse
+            }
+        }
+        catch{
+            print("data isnt valid")
+        }
+        
+        
+        
+        
     }
 }
 
