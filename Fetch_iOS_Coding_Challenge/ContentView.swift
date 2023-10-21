@@ -7,15 +7,48 @@
 
 import SwiftUI
 
+
+struct Meal : Hashable, Codable {
+    let name : String
+    let thumbnail : String
+    let id : String
+    
+}
+
+class ViewModel<ObjectType: ObservableObject>{
+    @Published var meals : [Meal] = []
+    func fetch() completion{
+        guard let url = URL(string: "https://themealdb.com/api/json/v1/1/filter.php?c=Dessert") else{
+            return
+        }
+        let task = URLSession.shared.dataTask(with: url){ [weak self ] data, _, error in
+            guard let data = data, error == nil else{
+                return
+            }
+            
+            //convert to JSON
+            do{
+                let meals = try JSONDecoder().decode([Meal.self], from: data)
+                DispatchQueue.main.async{
+                    self?.meals = meals
+                }
+            }
+           catch{
+                print(error)
+            }
+        }
+        task.resume()
+    }
+}
+
 struct ContentView: View {
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+        NavigationView{
+            List{
+                
+            }
         }
-        .padding()
+        .navigationTitle("Meals")
     }
 }
 
