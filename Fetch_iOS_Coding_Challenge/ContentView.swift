@@ -7,8 +7,10 @@
 
 import SwiftUI
 
-
-struct Meal : Hashable, Codable {
+struct Response : Codable{
+    let meals : [MyMeal]
+}
+struct MyMeal :  Codable {
     var strMeal : String
     var strMealThumb : String
     var idMeal : String
@@ -17,10 +19,10 @@ struct Meal : Hashable, Codable {
 
 
 struct ContentView: View {
-    @State private var meals = [Meal]()
+    @State private var myMeals = [MyMeal]()
     var body: some View {
         NavigationView {
-            List(meals, id : \.idMeal){ meal in
+            List(myMeals, id : \.idMeal){ meal in
                 VStack(alignment: .leading) {
                     Text(meal.strMeal)
                         .font(.headline)
@@ -33,9 +35,43 @@ struct ContentView: View {
             }
             .navigationTitle("Meals")
             .task {
-                await fetchData()
+               // await fetchData()
+                getData()
+                
             }
         }
+    }
+    
+    //let url = "https://themealdb.com/api/json/v1/1/filter.php?c=Dessert"
+    
+    
+    func getData(){
+        guard let url = URL(string: "https://themealdb.com/api/json/v1/1/filter.php?c=Dessert") else{
+            print("URL doesn't work")
+            return
+        }
+        let task = URLSession.shared.dataTask(with: url, completionHandler: {data, response, error in
+            guard let data = data, error == nil else{
+                print("Something went wrong")
+                return
+            }
+            
+            //now I have the data
+            var meals : Response?
+            do{
+                meals = try JSONDecoder().decode(Response.self, from: data)
+            }
+            catch{
+                print(String(describing:error))
+            }
+            guard let json = meals else{
+                return
+            }
+            
+            print(json.meals.first?.strMeal)
+            //print(json.meals.idMeal)
+        })
+        task.resume()
     }
     
     func fetchData() async{
@@ -49,8 +85,8 @@ struct ContentView: View {
             let (data, _) = try await URLSession.shared.data(from: url)
             
             //decode that data
-            if let decodedResponse = try? JSONDecoder().decode([Meal].self, from: data){
-                meals = decodedResponse
+            if let decodedResponse = try? JSONDecoder().decode([MyMeal].self, from: data){
+                myMeals = decodedResponse
             }
         }
         catch{
