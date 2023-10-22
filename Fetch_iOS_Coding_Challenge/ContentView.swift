@@ -16,84 +16,84 @@ struct MyMeal :  Hashable, Codable {
     var idMeal : String
     
 }
+class ViewModel : ObservableObject {
+    @Published var responses : [Response] = []
+    @Published var meals : [MyMeal] = []
+    
+    func getData() {
+        
+        guard let url = URL(string: "https://themealdb.com/api/json/v1/1/filter.php?c=Dessert")
+        else {
+            print("URL doesn't work")
+            return
+        }
+        let task = URLSession.shared.dataTask(with: url, completionHandler: {data, response, error in
+            guard let data = data, error == nil else{
+                print("Something went wrong")
+                return
+            }
+            
+            //now I have the data
+            var desserts : Response?
+            do {
+                desserts = try JSONDecoder().decode(Response.self, from: data)
+               //print(desserts!)
+                //print(desserts!.meals)
+                
+               // print(self.responses.first?.meals.first?.strMeal as Any)
+                //self.meals = desserts!.meals
+                DispatchQueue.main.async {
+                    self.meals = desserts!.meals
+                }
+                self.meals = desserts!.meals
+                print(self.meals)
+            }
+            catch{
+                print(String(describing:error))
+            }
+            
+            guard let json = desserts else{
+                return
+            }
+            
+            //print(json.meals.first?.strMeal)
+            //print(json.meals.first?.idMeal)
+            
+        })
+        task.resume()
+    }
+}
+
 
 var json : Response?
 struct ContentView: View {
     @StateObject var viewModel = ViewModel()
-    @State private var myMeals = [MyMeal]()
+    //@State private var myMeals = [MyMeal]()
     var body: some View {
         NavigationView {
-            List(myMeals, id : \.idMeal){ meal in
-                VStack(alignment: .leading) {
-                    Text(meal.strMeal)
-                        .font(.headline)
-                        .foregroundStyle(Color.black)
-                    //Image(meal.strMealThumb)
-                    
-                    
+            List {ForEach(viewModel.meals, id: \.self){ meal in
+                HStack{
+                    Text(meal.strMeal).bold()
                 }
-                
             }
-            .navigationTitle("Meals")
-            .task {
-               // await fetchData()
-                viewModel.getData()
-                
             }
         }
+        
+        .navigationTitle("Meals")
+        .task {
+            // await fetchData()
+            viewModel.getData()
+            
+        }
     }
+}
+            
     
     //let url = "https://themealdb.com/api/json/v1/1/filter.php?c=Dessert"
     
-    class ViewModel : ObservableObject {
-        @Published var responses : [Response] = []
-        @Published var meals : [MyMeal] = []
-        
-        func getData() {
-            
-            guard let url = URL(string: "https://themealdb.com/api/json/v1/1/filter.php?c=Dessert")
-            else {
-                print("URL doesn't work")
-                return
-            }
-            let task = URLSession.shared.dataTask(with: url, completionHandler: {data, response, error in
-                guard let data = data, error == nil else{
-                    print("Something went wrong")
-                    return
-                }
-                
-                //now I have the data
-                var desserts : Response?
-                do {
-                    desserts = try JSONDecoder().decode(Response.self, from: data)
-                   //print(desserts!)
-                    //print(desserts!.meals)
-                    
-                   // print(self.responses.first?.meals.first?.strMeal as Any)
-                    //self.meals = desserts!.meals
-                    DispatchQueue.main.async {
-                        self.meals = desserts!.meals
-                    }
-                    self.meals = desserts!.meals
-                    print(self.meals)
-                }
-                catch{
-                    print(String(describing:error))
-                }
-                
-                guard let json = desserts else{
-                    return
-                }
-                
-                //print(json.meals.first?.strMeal)
-                //print(json.meals.first?.idMeal)
-                
-            })
-            task.resume()
-        }
-    }
     
     
+ /*
     func fetchData() async{
         //create url
         guard let url = URL(string: "https://themealdb.com/api/json/v1/1/filter.php?c=Dessert") else{
@@ -116,8 +116,8 @@ struct ContentView: View {
         
         
         
-    }
-}
+    } */
+//}
 
 #Preview {
     ContentView()
