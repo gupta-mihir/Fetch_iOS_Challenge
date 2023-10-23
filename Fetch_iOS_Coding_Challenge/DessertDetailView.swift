@@ -12,7 +12,7 @@ import SwiftUI
 
 
 struct DessertDetailView: View {
-    @StateObject var viewModel2 = ViewModel2()
+    @StateObject var viewModel = ViewModel()
     var meals : MyMeal
     
     var body: some View {
@@ -32,7 +32,8 @@ struct DessertDetailView: View {
             Text(meals.strInstructions).font(.headline)
             
         }.task {
-            viewModel2.getDetailsData(id: "52772")
+            //viewModel2.getDetailsData()
+            viewModel.getData(id: meals.idMeal)
         }
         
     }
