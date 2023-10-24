@@ -38,10 +38,17 @@ struct DessertDetailView: View {
                         
                         
                         
+                        
                     }
+                    Text("Instructions")
+                        .font(.title2)
+                        .padding(10)
+                        .bold()
                     Text(meal_2.strInstructions)
                     Text("Ingredients")
                         .font(.title2)
+                        .padding(10)
+                        .bold()
                     HStack{
                         Text(meal_2.strMeasure1)
                         Text(meal_2.strIngredient1)
