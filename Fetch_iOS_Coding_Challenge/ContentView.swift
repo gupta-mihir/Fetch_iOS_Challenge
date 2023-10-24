@@ -49,7 +49,7 @@ class ViewModel : ObservableObject {
                 return
             }
             
-            //now I have the data
+            //data
             var desserts : Response?
             do {
                 desserts = try JSONDecoder().decode(Response.self, from: data)
