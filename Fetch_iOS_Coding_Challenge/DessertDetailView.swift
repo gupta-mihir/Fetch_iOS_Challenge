@@ -11,29 +11,50 @@ import SwiftUI
 //var meals = MyMeal.init(strMeal: "Apam balik", strMealThumb: "https:\\/\\/www.themealdb.com\\/images\\/media\\/meals\\/adxcbq1619787919.jpg", idMeal: "53049")
 
 
+
 struct DessertDetailView: View {
     @StateObject var viewModel = ViewModel()
+    @StateObject var detailViewModel = DetailViewModel()
+    
     var meals : MyMeal
     
     var body: some View {
-        VStack{
-            AsyncImage(url: URL(string: meals.strMealThumb)) {
-                image in image
-                    .frame(width: 15.0, height: 15)
-                    .padding(150)
-                    .aspectRatio(contentMode: .fill)
-                
-            } placeholder: {
-                Color.red
-                    .frame(width: 300, height: 200)
+        NavigationView {
+            List() { ForEach(detailViewModel.meals_2, id: \.idMeal){ meal_2 in
+                VStack{
+                    HStack(spacing: 200){
+                        AsyncImage(url: URL(string: meal_2.strMealThumb)) {
+                            image in image
+                                .image?.resizable()
+                                .aspectRatio(contentMode: .fill)
+                            
+                        }
+                        .padding(.vertical, 1)
+                        .frame(width: 10, height: 100)
+                        .aspectRatio(contentMode: .fill)
+                        // .background(Color.gray)
+                        
+                        
+                        
+                        Text(meal_2.strMeal)
+                            .multilineTextAlignment(.leading)
+                            .bold()
+                            .padding(5.0)
+                            .background(Color.white)
+                            .cornerRadius(13)
+                        
+                    }
+                    Text(meal_2.strInstructions)
+                    
+                }
             }
-            Text(meals.strMeal)
-                .font(.title2)
-            Text(meals.strInstructions).font(.headline)
-            
-        }.task {
-            //viewModel2.getDetailsData()
-            viewModel.getData(id: meals.idMeal)
+            }
+            .navigationTitle("Desserts")
+            .task {
+                
+                detailViewModel.getData(id: meals.idMeal)
+                
+            }
         }
         
     }
@@ -43,5 +64,7 @@ struct DessertDetailView: View {
 
 #Preview {
     //let url = URL(string: "https:\\/\\/www.themealdb.com\\/images\\/media\\/meals\\/adxcbq1619787919.jpg")
-    DessertDetailView(meals: MyMeal.init(strMeal: "Apam balik", strMealThumb: "https:\\/\\/www.themealdb.com\\/images\\/media\\/meals\\/adxcbq1619787919.jpg", idMeal: "53049", strInstructions: "TEST instructions"))
+    DessertDetailView(meals: MyMeal.init(strMeal: "Apam balik", strMealThumb: "https:\\/\\/www.themealdb.com\\/images\\/media\\/meals\\/adxcbq1619787919.jpg", idMeal: "53049"))
 }
+
+//meals_2: MyMeal2.init(strMeal: "Apam balik", strMealThumb: "https:\\/\\/www.themealdb.com\\/images\\/media\\/meals\\/adxcbq1619787919.jpg", idMeal: "53049", strInstructions: "TEST INSTRUCTIONS"

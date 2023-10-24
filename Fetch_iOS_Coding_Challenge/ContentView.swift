@@ -16,7 +16,7 @@ struct MyMeal :  Hashable, Codable {
     var strMeal : String
     var strMealThumb : String
     var idMeal : String
-    var strInstructions : String
+    //var strInstructions : String
     
 }
 
@@ -31,52 +31,18 @@ class ViewModel : ObservableObject {
     @Published var responses : [Response] = []
     @Published var meals : [MyMeal] = []
     
-    @Published var root : [Root] = []
-    @Published var child : [Child] = []
     
-    func getData(id : String) {
+    func getData() {
         
-        let urlStr = "https://www.themealdb.com/api/json/v1/1/lookup.php?i=" + id
-        let urlStr2 = "https://themealdb.com/api/json/v1/1/filter.php?c=Dessert"
+        //let urlStr2 = "https://www.themealdb.com/api/json/v1/1/lookup.php?i=" + id
+        let urlStr = "https://themealdb.com/api/json/v1/1/filter.php?c=Dessert"
         
         guard let url = URL(string: urlStr)
         else {
             print("URL doesn't work")
             return
         }
-        guard let url2 = URL(string: urlStr2)
-        else {
-            print("Url doesnt work")
-            return
-        }
-        let task2 = URLSession.shared.dataTask(with: url2, completionHandler: {data2, response, error in
-            guard let data2 = data2, error == nil else{
-                print("SOmething went wrong")
-                return
-            }
-            //now I have the data2
-            
-            var root : Root?
-            
-            do {
-                root = try JSONDecoder().decode(Root.self, from: data2)
-               //print(desserts!)
-                //print(desserts!.meals)
-                
-               // print(self.responses.first?.meals.first?.strMeal as Any)
-                //self.meals = desserts!.meals
-                DispatchQueue.main.async {
-                    self.child = root!.child
-                }
-                self.child = root!.child
-                print(self.meals)
-            }
-            catch{
-                print(String(describing:error))
-            }
-            
-        })
-        task2.resume()
+        
         let task = URLSession.shared.dataTask(with: url, completionHandler: {data, response, error in
             guard let data = data, error == nil else{
                 print("Something went wrong")
@@ -217,10 +183,75 @@ class ViewModel3 : ObservableObject {
     }
 }
 
+struct Response2 : Hashable, Codable{
+    let meals : [MyMeal2]
+}
+struct MyMeal2 :  Hashable, Codable {
+    var strMeal : String
+    var strMealThumb : String
+    var idMeal : String
+    var strInstructions : String
+    
+}
+
+
+class DetailViewModel : ObservableObject {
+    @Published var responses_2 : [Response2] = []
+    @Published var meals_2 : [MyMeal2] = []
+    
+    
+    func getData(id: String) {
+        
+        let urlStr = "https://www.themealdb.com/api/json/v1/1/lookup.php?i=" + id
+        //let urlStr = "https://themealdb.com/api/json/v1/1/filter.php?c=Dessert"
+        
+        guard let url = URL(string: urlStr)
+        else {
+            print("URL doesn't work")
+            return
+        }
+        
+        let task = URLSession.shared.dataTask(with: url, completionHandler: {data, response, error in
+            guard let data = data, error == nil else{
+                print("Something went wrong")
+                return
+            }
+            
+            //now I have the data
+            var desserts : Response2?
+            do {
+                desserts = try JSONDecoder().decode(Response2.self, from: data)
+               //print(desserts!)
+                //print(desserts!.meals)
+                
+               // print(self.responses.first?.meals.first?.strMeal as Any)
+                //self.meals = desserts!.meals
+                DispatchQueue.main.async {
+                    self.meals_2 = desserts!.meals
+                }
+                self.meals_2 = desserts!.meals
+                //print(self.meals_2)
+            }
+            catch{
+                print(String(describing:error))
+            }
+            
+            guard let json = desserts else{
+                return
+            }
+            print("JSON PRINTING!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+            print(json.meals.first?.strInstructions)
+            //print(json.meals.first?.idMeal)
+            
+        })
+        task.resume()
+    }
+}
 
 var json : Response?
 struct ContentView: View {
     @StateObject var viewModel = ViewModel()
+    @StateObject var detailsViewModel = DetailViewModel()
     //@StateObject var viewModel2 = ViewModel2()
     
     @State private var myMeals = [MyMeal]()
@@ -257,11 +288,8 @@ struct ContentView: View {
             }
             .navigationTitle("Desserts")
             .task {
-                // await fetchData()
-               // viewModel2.getData2()
-                let meal_id = viewModel.child.count
-                print(meal_id)
-                viewModel.getData(id: "52773")
+                
+                viewModel.getData()
                 
             }
         }
